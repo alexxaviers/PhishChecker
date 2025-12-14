@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 from src.data_loader import load_dataset
 from src.preprocess import preprocess_data
 from src.model_training import train_logistic_regression, train_random_forest, train_xgboost
-from src.evaluate import evaluate_model, generate_results_table
+from src.evaluate import evaluate_model, generate_results_table, plot_confusion_matrix, plot_feature_importances, plot_roc_curve
 
 
 def main():
@@ -67,6 +67,74 @@ def main():
     xgb_results = evaluate_model(xgb_model, X_test, y_test, "XGBoost")
     
     all_results = [lr_results, rf_results, xgb_results]
+    
+    # Plot confusion matrices for all models
+    print("\n[Step 5.1] Generating confusion matrix plots...")
+    report_dir = os.path.join(os.path.dirname(__file__), 'report')
+    
+    plot_confusion_matrix(
+        "Logistic Regression",
+        lr_results['Confusion_Matrix'],
+        os.path.join(report_dir, 'confusion_matrix_logistic_regression.png')
+    )
+    plot_confusion_matrix(
+        "Random Forest",
+        rf_results['Confusion_Matrix'],
+        os.path.join(report_dir, 'confusion_matrix_random_forest.png')
+    )
+    plot_confusion_matrix(
+        "XGBoost",
+        xgb_results['Confusion_Matrix'],
+        os.path.join(report_dir, 'confusion_matrix_xgboost.png')
+    )
+    
+    # Generate feature importance plots for all models
+    print("\n[Step 5.2] Generating feature importance plots...")
+    feature_names = X_train.columns.tolist()
+    
+    plot_feature_importances(
+        lr_model,
+        feature_names,
+        "Logistic Regression",
+        os.path.join(report_dir, 'feature_importances_logistic_regression.png')
+    )
+    plot_feature_importances(
+        rf_model,
+        feature_names,
+        "Random Forest",
+        os.path.join(report_dir, 'feature_importances_random_forest.png')
+    )
+    plot_feature_importances(
+        xgb_model,
+        feature_names,
+        "XGBoost",
+        os.path.join(report_dir, 'feature_importances_xgboost.png')
+    )
+    
+    # Generate ROC curves for all models
+    print("\n[Step 5.3] Generating ROC curves...")
+    
+    plot_roc_curve(
+        lr_model,
+        X_test,
+        y_test,
+        "Logistic Regression",
+        os.path.join(report_dir, 'roc_logistic_regression.png')
+    )
+    plot_roc_curve(
+        rf_model,
+        X_test,
+        y_test,
+        "Random Forest",
+        os.path.join(report_dir, 'roc_random_forest.png')
+    )
+    plot_roc_curve(
+        xgb_model,
+        X_test,
+        y_test,
+        "XGBoost",
+        os.path.join(report_dir, 'roc_xgboost.png')
+    )
     
     # Step 6: Save results to markdown table
     print("\n[Step 6] Saving results to markdown table...")
